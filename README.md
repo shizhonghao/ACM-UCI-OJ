@@ -3,7 +3,7 @@ weekly test holder for ACM@UCI
 
 ## Dependency
 
-* run `pip install flask flask-login flask-`
+* run `pip install flask flask-login flask-mongoengine`
 
 ## Usage
 
