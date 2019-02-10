@@ -1,7 +1,16 @@
 from flask import Blueprint
+from flask_login import LoginManager
+
+from apis.models import User
 
 auth = Blueprint('auth', __name__)
-from flask_login import LoginManager
+login_manager = LoginManager()
+
+@login_manager.user_loader
+def load_user(user_id):
+	return User.get(user_id)
+
+# --- below are the routes used for authentication
 
 @auth.route("/")
 def auth_home():
@@ -17,4 +26,5 @@ def login():
 
 @auth.route("/logout")
 def logout():
-	return "logout here"
+    logout_user()
+    return redirect(somewhere)
