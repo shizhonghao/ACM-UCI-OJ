@@ -1,6 +1,6 @@
 from flask_mongoengine import MongoEngine
 from flask_login import UserMixin
-from . import db
+from apis import db
 from mongoengine import *
 
 

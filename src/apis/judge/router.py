@@ -1,30 +1,62 @@
-from flask import Blueprint
+from flask import request, jsonify, Blueprint
 from apis.models import User, OnlineJudge, Problem, Submission, Contest
+from apis import bot_list
 
 judge = Blueprint('judge', __name__)
 
-@judge.route('/contest')
-def contest():
-	return "list here"
+@judge.route('/contest_list')
+def contest_list():
+    return "list here"
 
 @judge.route('/test')
 def test():
-	test_user = User(name='test',password='password', email='test@test.com')
-	test_user.save()
-	test_problem = Problem()
-	oj = OnlineJudge(name='TestJudge')
-	oj.save()
-	return "problem here"
+    test_user = User(name='test',password='password', email='test@test.com')
+    test_user.save()
+    test_problem = Problem()
+    oj = OnlineJudge(name='TestJudge')
+    oj.save()
+    return "problem here"
 
-@judge.route('/submission')
-def submission():
-	return "show submission"
-
+# Content-Type: application/json;
+# body:{"oj", "contest", "problem_id", "language", "code" }
 @judge.route('/submit')
 def submit():
-	return "submit"
+    data = request.get_json()
+    print("New submission on:", data["oj"], data["contest"], data["problem_id"], data["language"])
+    # !!!to be implemented!!!
+    # add submission to database
+    if data["oj"] not in bot_list:
+        print("oj in query not found.")
+        return jsonify({"success" : "false", "message" : "Invalid OJ name"})
+    bot = bot_list[data["oj"]]
+    status_code = bot.submit(data["contest"], data["problem_id"], data["language"], data["code"])
+    if status_code > 400:
+        # !!!to be implemented!!!
+        # change submission status on the database to false
+        return jsonify({"success": "false", "message": "fail to submit the problem"})
+    return jsonify({"success" : "true"})
+
+# Content-Type: application/json;
+# body:{"oj", "contest", "problem_id", "refresh"}
+@judge.route('/problem')
+def get_problem():
+    data = request.get_json()
+    # !!!to be implemented!!!
+    # if the problem exist in database && refresh==false, return the problem from database
+    # else perform a query and update the database
+    print(data)
+    if data["oj"] not in bot_list:
+        print("oj in query not found.")
+        return jsonify({"success" : "false", "message" : "Invalid OJ name"})
+    bot = bot_list[data["oj"]]
+    bot.get_problem(data["contest"], data["problem_id"])
+    return jsonify({"success" : "true"})
+
+@judge.route('/my_submissions')
+def my_submissions():
+    return "my submissions"
 
 @judge.route('/new_contest')
 def new_contest():
-	return "new contest"
+    return "new contest"
 

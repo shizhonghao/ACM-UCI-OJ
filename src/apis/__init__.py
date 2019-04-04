@@ -4,7 +4,11 @@ from apis import config
 
 app = Flask(__name__)
 app.config.from_object(config)
+db = MongoEngine(app)
 
+# every thing that require db operation should be after this line
+
+"""
 @app.route("/")
 @app.route("/home")
 def home():
@@ -13,17 +17,14 @@ def home():
 @app.route("/about")
 def about():
     return "<h1>About Page</h1>"
+"""
+# here we create instance for bots of all platforms
+from apis.bots import codeforces_bot
+bot_list=\
+    {
+        "codeforces" : codeforces_bot(),
+    }
 
-# @app.route("/register")
-# def register():
-#     form = RegistrationForm()
-#     return render_template('register.html',title = 'Register', form = form)
-#
-# @app.route("/login")
-# def register():
-#     form = LoginForm()
-#     return render_template('login.html',title = 'Login', form = form)
-db = MongoEngine(app)
 
 from .auth import auth
 from .judge import judge
