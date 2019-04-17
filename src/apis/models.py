@@ -15,18 +15,20 @@ class User(UserMixin, db.Document):
 
 class OnlineJudge(db.Document):
     name = db.StringField(required=True, unique=True)
-    oj_id = db.IntField(required=True, unique=True)
+    #oj_id = db.IntField(required=True, unique=True)
 
 
 class Problem(db.Document):
     online_judge = db.ReferenceField('OnlineJudge')
-    problem_id = db.StringField(required=True, unique=True)
+    problem_id = db.StringField(required=True)
     title = db.StringField(required=True)
+    time_limit = db.StringField()
+    memory_limit = db.StringField()
     description = db.StringField()
     input_format = db.StringField()
     output_format = db.StringField()
-    sample_input = db.StringField()
-    sample_output = db.StringField()
+    sample_input = db.ListField(db.StringField())
+    sample_output = db.ListField(db.StringField())
 
 
 class Submission(db.Document):

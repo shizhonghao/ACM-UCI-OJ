@@ -41,32 +41,47 @@ class codeforces_bot(bot):
         print("login response: ", response)
 
     # in the form "https://codeforces.com/contest/1143/problem/A"
-    def construct_problem_url(self, contest, problem_id):
-        return "https://codeforces.com/problemset/problem/" + str(contest) + "/" + str(problem_id)
+    def construct_problem_url(self, contest, id):
+        return "https://codeforces.com/problemset/problem/" + str(contest) + "/" + str(id)
+
+    def parse_problem_id(self, problem_id):
+        contest, id = "", ""
+        try:
+            contest, id = re.compile("^(\d+)([a-zA-Z])$").findall(problem_id)[0]
+            print(contest, id)
+        except:
+            print("not a valid problem id")
+        return contest, id
 
     def parse_problem(self, text):
+        parse_result = {}
         try:
-            title = re.compile(r'<div class="title">(.+?)</div>').findall(text)[0]
-            print(title)
+            parse_result["title"] = re.compile(r'<div class="title">(.+?)</div>').findall(text)[0]
+            parse_result["time_limit"] = re.compile(r'<div class="time-limit"><div class="property-title">.+?</div>(.+?)</div>').findall(text)[0]
+            parse_result["memory_limit"] = re.compile(r'<div class="memory-limit"><div class="property-title">.+?</div>(.+?)</div>').findall(text)[0]
+
+            print(parse_result["title"] )
         except:
             print("not a valid problem page")
-        parse_result = {}
+
         return parse_result
 
-    def get_problem(self, contest, problem_id):
-        url = self.construct_problem_url(contest,problem_id)
+    def get_problem(self, problem_id):
+        contest, id = self.parse_problem_id(problem_id)
+        url = self.construct_problem_url(contest,id)
         response = requests.get(url)
         return self.parse_problem(response.text)
 
     # add a submission to database
-    def submit(self, contest, problem_id, language, code):
-        url = self.construct_problem_url(contest, problem_id)
+    def submit(self, problem_id, language, code):
+        contest, id = self.parse_problem_id(problem_id)
+        url = self.construct_problem_url(contest, id)
         response = requests.post(url,
                                  files=
                                  {
                                      "csrf_token": self.csrf_token,
                                      "action": "submitsolutionformsubmitted",
-                                     "submittedProblemIndex": problem_id,
+                                     "submittedProblemIndex": id,
                                      "source": code,
                                      "programTypeId": language,
                                  },
